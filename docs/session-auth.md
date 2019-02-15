@@ -32,8 +32,6 @@ a second identity on the Live Events Platform.
 
 > example\12345
 
-> example\joe@blogs.co.uk
-
 It is highly recommended that you use some form of database identifier as your
 unique identifier, such as the primary key of the row representing the user in your
 main databases.
@@ -96,8 +94,7 @@ $builder
     ->setName('Joe Blogs')
     ->setEmail('joe.blogs@exmaple.com')
     ->setIdentifier($client_id . '\\' . $unique_id)
-    ->setSessionReference('abc-123456')
-    ->toUrl();
+    ->setSessionReference('abc-123456');
 
 echo $builder->toUrl();
 ```

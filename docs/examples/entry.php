@@ -14,7 +14,6 @@
 		->setName('Joe Blogs')
 		->setEmail('joe.blogs@exmaple.com')
 		->setIdentifier($client_id . '\\' . $unique_id)
-		->setSessionReference('abc-123456')
-		->toUrl();
+		->setSessionReference('abc-123456');
 	
 	echo $builder->toUrl();

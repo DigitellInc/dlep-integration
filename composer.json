@@ -3,7 +3,7 @@
   "description": "Provides PHP integration functions for Digitell Live Events Platform",
   "type": "library",
   "require": {
-    "firebase/php-jwt": "v5.0.0"
+    "firebase/php-jwt": "5.*"
   },
   "license": "proprietary",
   "authors": [
