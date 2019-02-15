@@ -1,0 +1,18 @@
+{
+  "name": "digitell/dlep-integration",
+  "description": "Provides PHP integration functions for Digitell Live Events Platform",
+  "type": "library",
+  "require": {
+    "firebase/php-jwt": "v5.0.0"
+  },
+  "license": "All Rights Reserved",
+  "authors": [
+    {
+      "name": "Mark Randall",
+      "email": "mrandall@digitellinc.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": { "Digitell\\LiveEventsPlatformAPI\\": "src" }
+  }
+}
