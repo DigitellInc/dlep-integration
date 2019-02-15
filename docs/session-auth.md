@@ -109,3 +109,6 @@ your webroot.
 
 If you have reason to believe your private key may have been compromised, please contact your
 Digitell, Inc. representative immediately to have it reset.
+
+## More
+For more information contact James Newman (jnewman@digitellinc.com)
