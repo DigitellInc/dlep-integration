@@ -131,7 +131,7 @@ although we recommend building a way to add arbitrary query string parameters wh
 own helper functions.
 
 ## Pass-Through
-Tokens MUST be short lived, typically lasting no more than 5 minutes, for that reason is is required
+Tokens MUST be short lived, typically lasting no more than 5 minutes, for that reason it is required
 that token generation only occurs as part of a pass-through just-in-time mechanism where the token
 is generated on-demand at the time a user chooses to enter the session.
 
