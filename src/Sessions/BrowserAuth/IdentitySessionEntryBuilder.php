@@ -66,6 +66,16 @@
 			$this->nonce         = bin2hex(random_bytes(16));
 		}
 		
+		/**
+		 * Creates the URL containing parameters and the token
+		 *
+		 * This will build a URL based on the class properties. In almost all circumstances, you should only call
+		 * this function ONCE per instance of the class, as certain properties, such as the nonce, are created
+		 * when the class is initialized.
+		 *
+		 * @return string
+		 */
+		
 		public function toUrl(): string {
 			/* these are the parameters which are signed */
 			$payload = [

@@ -77,7 +77,7 @@ be your client id, followed by a random string.
 
 ---
 
-## Using the Authentication API
+## Using the PHP Authentication API
 An API helper has been provided in the Digitell\LiveEventsPlatformAPI\Sessions\BrowserAuth\IdentitySessionEntryBuilder
 class. 
 
@@ -106,6 +106,39 @@ your webroot.
 
 If you have reason to believe your private key may have been compromised, please contact your
 Digitell, Inc. representative immediately to have it reset.
+
+## Creating Authentication URLs
+If you creating an integration solution from scratch, you will need to build a URL containing
+the token which you can then pass to the user.
+
+By default, sessions will be hosted upon the live.digitellinc.com domain, however under
+certain circumstances, you may be provided with access to other domains that host previews of upcoming
+features or special configurations. 
+
+To build a complete URL, append your token to the following URL:
+https://live.digitellinc.com/api/browser/authorize/sl/identity?token=
+
+#### PSF Tokens
+Digitell's Live Events Platform has the option to use additional URL flags called "PSF" or persistent
+session flags. These can activate (or deactivate) certain functions on a per-user level, but are completely
+optional and do not require authentication or signing.
+
+PSF flags can be added to the end of a URL in the following manner:
+https://live.digitellinc.com/api/browser/authorize/sl/identity?token=YourToken&psf_example1=hello&psf_example2=world
+
+Under normal circumstances you will not need to concern yourself with adding any of these flags,
+although we recommend building a way to add arbitrary query string parameters when building your
+own helper functions.
+
+## Pass-Through
+Tokens MUST be short lived, typically lasting no more than 5 minutes, for that reason is is required
+that token generation only occurs as part of a pass-through just-in-time mechanism where the token
+is generated on-demand at the time a user chooses to enter the session.
+
+You MUST NOT generate tokens before they are consumed, for example you must not create a hyperlink
+or button that contains a link containing a token, instead you should have that hyperlink or button
+point to a page on your own website which will create the URL/token and immediately redirect the user 
+to the resulting URL within a single page request.
 
 ## More
 For more information contact James Newman (jnewman@digitellinc.com)
