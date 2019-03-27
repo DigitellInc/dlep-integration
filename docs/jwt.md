@@ -42,6 +42,7 @@ the request, the "kid" (Key Identifier) MUST also be included in the head as so:
 
 ```json
 {
+  "typ": "JWT",
   "alg": "RS256",
   "kid": "ClientReference"
 }
