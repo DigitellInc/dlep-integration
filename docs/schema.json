@@ -55,6 +55,12 @@
       "description": "Expiry time. Should be the time() on the server when the auth code was issued, plus a small margin, such as 5 minutes (300)",
       "type": "integer"
     },
+    "jti": {
+      "description": "A cryptographic nonce. Must be a random string comprised of letters a-Z and numbers 0-9",
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 40
+    },
     "aud": {
       "description": "Audience. MUST be an array containing target audience (see docs)",
       "type": "array",
