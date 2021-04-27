@@ -8,6 +8,18 @@
 	
 	final class IdentitySessionEntryBuilder
 	{
+		/** @var int - Can view the stream but cannot interact with chat and questions */
+		public const ACCESS_LEVEL_OBSERVER = 10;
+		
+		/** @var int - Can view the stream and partake of all interactive features */
+		public const ACCESS_LEVEL_PARTICIPANT = 50;
+		
+		/** @var int - As with participant, but access to host functions such as moderation */
+		public const ACCESS_LEVEL_HOST = 300;
+		
+		/** @var int - As with host but can access in-built presentation tools for the slide deck */
+		public const ACCESS_LEVEL_PRESENTER = 700;
+		
 		/** @var string */
 		private $provider_name;
 		
@@ -28,6 +40,12 @@
 		
 		/** @var string */
 		private $identifier = '';
+		
+		/** @var int - Which access to grant the user */
+		private $access_level = 0;
+		
+		/** @var string - Custom title to grant the user */
+		private $custom_title = '';
 		
 		/** @var bool - Should popups be offered */
 		private $offer_popup = false;
@@ -52,12 +70,12 @@
 		 *
 		 * @param string $provider_name - Certificate name as provided to you by Digitell, Inc.
 		 * @param string $provider_cert - Contains the PEM string as read from either a file or database
-		 * @param string $domain - Default domain to send users to
+		 * @param string $domain        - Default domain to send users to
 		 *
 		 * @throws \Exception - If there is an exception generating enough randomness
 		 */
 		
-		public function __construct(string $provider_name, string $provider_cert, string $domain = 'https://live.digitellinc.com') {
+		public function __construct(string $provider_name, string $provider_cert, string $domain = 'https://live2.digitell.io') {
 			$this->provider_name = $provider_name;
 			$this->provider_cert = $provider_cert;
 			$this->domain        = $domain;
@@ -81,21 +99,30 @@
 			$payload = [
 				'aud'      => [
 					'live.digitellinc.com/api/browser/authorize/sl/identity',
-					parse_url($this->domain, PHP_URL_HOST)
+					parse_url($this->domain, PHP_URL_HOST),
+					$this->domain . '/api/browser/authorize/sl/identity',
 				],
 				'identity' => [
 					'identifier' => $this->identifier,
 					'name'       => $this->name,
-					'email'      => $this->email
+					'email'      => $this->email,
 				],
 				'session'  => $this->session_reference,
 				'iat'      => $this->issued_time,
 				'exp'      => $this->expiry_time,
-				'jti'      => $this->nonce
+				'jti'      => $this->nonce,
 			];
 			
+			if ($this->access_level) {
+				$payload['login']['access'] = $this->access_level;
+			}
+			
+			if ($this->custom_title !== '') {
+				$payload['login']['custom_title'] = $this->custom_title;
+			}
+			
 			$query = [
-				'token' => JWT::encode($payload, $this->provider_cert, 'RS256', $this->provider_name)
+				'token' => JWT::encode($payload, $this->provider_cert, 'RS256', $this->provider_name),
 			];
 			
 			if ($this->isOfferingPopup()) {
@@ -107,6 +134,20 @@
 			}
 			
 			return $this->domain . '/api/browser/authorize/sl/identity?' . \http_build_query($query);
+		}
+		
+		/**
+		 * @return bool
+		 */
+		public function isOfferingPopup(): bool {
+			return $this->offer_popup;
+		}
+		
+		/**
+		 * @return bool
+		 */
+		public function isShowingSystemChecker(): bool {
+			return $this->show_system_checker;
 		}
 		
 		/**
@@ -127,21 +168,6 @@
 		}
 		
 		/**
-		 * Set the absolute timestamp when the authentication token will expire.
-		 *
-		 * By default, the token will expire 5 minutes after it has been generated, you
-		 * may alter this value, however the events platform may chose to reject tokens
-		 * that expire too far into the future.
-		 *
-		 * @param int $expiry_time
-		 * @return $this
-		 */
-		public function setExpiryTime(int $expiry_time) {
-			$this->expiry_time = $expiry_time;
-			return $this;
-		}
-		
-		/**
 		 * Sets the relative timestamp when the authentication token will expire
 		 *
 		 * This function is similar to setExpiryTime except it will add the $seconds
@@ -153,20 +179,6 @@
 		
 		public function setExpiryIn(int $seconds) {
 			$this->setExpiryTime(time() + $seconds);
-			return $this;
-		}
-		
-		/**
-		 * Set when the authentication token was generated.
-		 *
-		 * Debugging use only; the live event platform may reject tokens which were generated too far
-		 * into the past.
-		 *
-		 * @param int $issued_time
-		 * @return $this
-		 */
-		public function setIssuedTime(int $issued_time) {
-			$this->issued_time = $issued_time;
 			return $this;
 		}
 		
@@ -186,74 +198,6 @@
 		 */
 		public function setShowSystemChecker(bool $show_system_checker) {
 			$this->show_system_checker = $show_system_checker;
-			return $this;
-		}
-		
-		/**
-		 * Sets additional parameters
-		 *
-		 * There are various keys and hooks which can be passed through to the authentication
-		 * script.
-		 *
-		 * @param array $extra_url_parameters
-		 * @return $this
-		 */
-		public function setExtraUrlParameters(array $extra_url_parameters) {
-			$this->extra_url_parameters = $extra_url_parameters;
-			return $this;
-		}
-		
-		/**
-		 * @param string $name
-		 * @return $this
-		 */
-		public function setName(string $name) {
-			$this->name = $name;
-			return $this;
-		}
-		
-		/**
-		 * @param string $email
-		 * @return $this
-		 */
-		public function setEmail(string $email) {
-			$this->email = $email;
-			return $this;
-		}
-		
-		/**
-		 * @param string $session_reference
-		 * @return $this
-		 */
-		public function setSessionReference(string $session_reference) {
-			$this->session_reference = $session_reference;
-			return $this;
-		}
-		
-		/**
-		 * @param string $identifier
-		 * @return $this
-		 */
-		public function setIdentifier(string $identifier) {
-			$this->identifier = $identifier;
-			return $this;
-		}
-		
-		/**
-		 * Sets the cryptographic nonce
-		 *
-		 * Each time a code is generated, it should have a single, unique nonce value provided
-		 * to it. This code is used to track individual requests and can be used to reject specific
-		 * tokens.
-		 *
-		 * Nonce values should be completely random strings, if different tokens are given the same
-		 * nonce they may be rejected.
-		 *
-		 * @param string $nonce - Custom nonce to set
-		 * @return $this
-		 */
-		public function setNonce(string $nonce) {
-			$this->nonce = $nonce;
 			return $this;
 		}
 		
@@ -279,17 +223,25 @@
 		}
 		
 		/**
-		 * @return bool
-		 */
-		public function isOfferingPopup(): bool {
-			return $this->offer_popup;
-		}
-		
-		/**
 		 * @return int
 		 */
 		public function getExpiryTime(): int {
 			return $this->expiry_time;
+		}
+		
+		/**
+		 * Set the absolute timestamp when the authentication token will expire.
+		 *
+		 * By default, the token will expire 5 minutes after it has been generated, you
+		 * may alter this value, however the events platform may chose to reject tokens
+		 * that expire too far into the future.
+		 *
+		 * @param int $expiry_time
+		 * @return $this
+		 */
+		public function setExpiryTime(int $expiry_time) {
+			$this->expiry_time = $expiry_time;
+			return $this;
 		}
 		
 		/**
@@ -300,6 +252,20 @@
 		}
 		
 		/**
+		 * Set when the authentication token was generated.
+		 *
+		 * Debugging use only; the live event platform may reject tokens which were generated too far
+		 * into the past.
+		 *
+		 * @param int $issued_time
+		 * @return $this
+		 */
+		public function setIssuedTime(int $issued_time) {
+			$this->issued_time = $issued_time;
+			return $this;
+		}
+		
+		/**
 		 * @return string
 		 */
 		public function getNonce(): string {
@@ -307,10 +273,21 @@
 		}
 		
 		/**
-		 * @return bool
+		 * Sets the cryptographic nonce
+		 *
+		 * Each time a code is generated, it should have a single, unique nonce value provided
+		 * to it. This code is used to track individual requests and can be used to reject specific
+		 * tokens.
+		 *
+		 * Nonce values should be completely random strings, if different tokens are given the same
+		 * nonce they may be rejected.
+		 *
+		 * @param string $nonce - Custom nonce to set
+		 * @return $this
 		 */
-		public function isShowingSystemChecker(): bool {
-			return $this->show_system_checker;
+		public function setNonce(string $nonce) {
+			$this->nonce = $nonce;
+			return $this;
 		}
 		
 		/**
@@ -321,10 +298,33 @@
 		}
 		
 		/**
+		 * Sets additional parameters
+		 *
+		 * There are various keys and hooks which can be passed through to the authentication
+		 * script.
+		 *
+		 * @param array $extra_url_parameters
+		 * @return $this
+		 */
+		public function setExtraUrlParameters(array $extra_url_parameters) {
+			$this->extra_url_parameters = $extra_url_parameters;
+			return $this;
+		}
+		
+		/**
 		 * @return string
 		 */
 		public function getName(): string {
 			return $this->name;
+		}
+		
+		/**
+		 * @param string $name
+		 * @return $this
+		 */
+		public function setName(string $name) {
+			$this->name = $name;
+			return $this;
 		}
 		
 		/**
@@ -335,10 +335,28 @@
 		}
 		
 		/**
+		 * @param string $email
+		 * @return $this
+		 */
+		public function setEmail(string $email) {
+			$this->email = $email;
+			return $this;
+		}
+		
+		/**
 		 * @return string
 		 */
 		public function getSessionReference(): string {
 			return $this->session_reference;
+		}
+		
+		/**
+		 * @param string $session_reference
+		 * @return $this
+		 */
+		public function setSessionReference(string $session_reference) {
+			$this->session_reference = $session_reference;
+			return $this;
 		}
 		
 		/**
@@ -348,5 +366,48 @@
 			return $this->identifier;
 		}
 		
+		/**
+		 * @param string $identifier
+		 * @return $this
+		 */
+		public function setIdentifier(string $identifier) {
+			$this->identifier = $identifier;
+			return $this;
+		}
 		
+		/**
+		 * @return int
+		 */
+		public function getAccessLevel(): int {
+			return $this->access_level;
+		}
+		
+		/**
+		 * Sets the desired access level (if different from default).
+		 *
+		 * Please see the ACCESS_LEVEL_XX constants of this class
+		 *
+		 * @param int $access_level
+		 * @return $this
+		 */
+		public function setAccessLevel(int $access_level) {
+			$this->access_level = $access_level;
+			return $this;
+		}
+		
+		/**
+		 * @return string
+		 */
+		public function getCustomTitle(): string {
+			return $this->custom_title;
+		}
+		
+		/**
+		 * @param string $custom_title
+		 * @return $this
+		 */
+		public function setCustomTitle(string $custom_title) {
+			$this->custom_title = $custom_title;
+			return $this;
+		}
 	}
