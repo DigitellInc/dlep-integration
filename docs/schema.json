@@ -4,27 +4,30 @@
   "type": "object",
   "properties": {
     "identity": {
-      "oneOf": [
+      "description": "Identity can be an object containing full registration details (recommended when authenticating externally) or a string containing an existing identifier",
+      "anyOf": [
         {
+          "title": "For use with complete registration",
+          "description": "The complete registration object should be used when you wish to create (or update) a registration. This method is recommended for external integrations",
           "type": "object",
           "properties": {
             "identifier": {
               "description": "Unique identifier representing a single person. Comprised of the client reference followed by a client provided ID",
               "type": "string",
-              "minLength": 2,
+              "minLength": 0,
               "maxLength": 80
             },
             "name": {
-              "description": "User's registered email. Visible on reporting but not available to other attendees",
+              "description": "User display name, visible in reporting as well as to any other attendees in a session",
               "type": "string",
-              "minLength": 5,
-              "maxLength": 70
+              "minLength": 0,
+              "maxLength": 45
             },
             "email": {
               "description": "User's registered email. Visible on reporting but not available to other attendees",
               "type": "string",
-              "minLength": 5,
-              "maxLength": 70
+              "minLength": 0,
+              "maxLength": 80
             }
           },
           "required": [
@@ -36,8 +39,9 @@
         {
           "description": "Unique identifier representing a single person. Comprised of the client reference followed by a client provided ID",
           "type": "string",
-          "minLength": 2,
-          "maxLength": 80
+          "minLength": 0,
+          "maxLength": 80,
+          "title": "For use with existing registration"
         }
       ]
     },
@@ -47,22 +51,77 @@
       "minLength": 4,
       "maxLength": 30
     },
+    "login": {
+      "type": "object",
+      "properties": {
+        "access": {
+          "description": "Access",
+          "type": "integer",
+          "enum": [
+            0,
+            10,
+            50,
+            300,
+            700,
+            950,
+            999
+          ],
+          "enumLabels": [
+            {
+              "type": "integer",
+              "description": "None",
+              "const": 0
+            },
+            {
+              "type": "integer",
+              "description": "Observer",
+              "const": 10
+            },
+            {
+              "type": "integer",
+              "description": "Attendee",
+              "const": 50
+            },
+            {
+              "type": "integer",
+              "description": "Host",
+              "const": 300
+            },
+            {
+              "type": "integer",
+              "description": "Presenter",
+              "const": 700
+            },
+            {
+              "type": "integer",
+              "description": "External Producer",
+              "const": 950
+            },
+            {
+              "type": "integer",
+              "description": "Producer",
+              "const": 999
+            }
+          ]
+        },
+        "custom_title": {
+          "description": "Custom Title",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 35
+        }
+      }
+    },
     "iat": {
-      "description": "Issued at time. Should be the time() on the server where the auth code was created",
+      "description": "Issued at time . Should be the time() on the server where the auth code was created",
       "type": "integer"
     },
     "exp": {
-      "description": "Expiry time. Should be the time() on the server when the auth code was issued, plus a small margin, such as 5 minutes (300)",
+      "description": "Expiry time . Should be the time() on the server when the auth code was issued, plus a small margin, such as 5 minutes(300)",
       "type": "integer"
     },
-    "jti": {
-      "description": "A cryptographic nonce. Must be a random string comprised of letters a-Z and numbers 0-9",
-      "type": "string",
-      "minLength": 20,
-      "maxLength": 40
-    },
     "aud": {
-      "description": "Audience. MUST be an array containing target audience (see docs)",
+      "description": "MUST be an array containing both \"live.digitellinc.com\/api\/browser\/authorize\/sl\/identity\" and the hostname of the server it is intended for e.g. \"live2.digitell.io\". Version 2 requires the full URI to the authorization endpoint, without the query string e.g. \"https:\/\/live2.digitell.io\/api\/browser\/authorize\/sl\/identity\"",
       "type": "array",
       "items": {
         "type": "string"

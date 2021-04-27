@@ -1,3 +1,5 @@
+Updated: 2021-04-27 with additional audience claims.
+
 # JWT (JSON Web Tokens)
 Authentication to Digitell Live Events Platform is performed using JWT.
 
@@ -30,10 +32,19 @@ are used to authorize access to a particular identity and session.
    "jti": "RandomNonceGoesHere",
    "aud": [
      "live.digitellinc.com",
-     "live.digitellinc.com/api/browser/authorize/sl/identity"
+     "live.digitellinc.com/api/browser/authorize/sl/identity",
+     "https://[domain]/api/browser/authorize/sl/identity"
    ]
 }
 ```
+
+### Audience Claim
+The following 3 audience (aud) claims are required:
+
+"live.digitellinc.com", "live.digitellinc.com/api/browser/authorize/sl/identity" and the full URL to the
+authentication endpoint, this will usually be: "https://live2.digitell.io/api/browser/authorize/sl/identity".
+
+These claims will be added automatically when using the PHP SDK.
 
 ### JWT Header
 Third party libraries will automatically add the signing algorithm (which MUST be RS256) to the HEAD

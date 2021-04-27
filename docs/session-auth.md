@@ -18,7 +18,7 @@ registration method, which will create a new identity if it does not exist, or
 update the information of a previously existing one (if necessary).
 
 #### Identifier (string) [2-80 characters]
-The identifier looks very much like a domain login, it is comprised of two parts.
+The identifier looks very much like a domain login, it comprises two parts.
 The first is the client identifier, this will usually be a short alphanumeric string
 that matches the name of your certificate. The second is a unique identifier that
 is unique to your integration.
@@ -77,12 +77,41 @@ be your client id, followed by a random string.
 
 ---
 
+### Login :: Access Level (int) (Optional)
+You may automatically elevate the permissions of the user logging in by setting an access level within
+the login object of the claims. This value MUST be one of the following integers:
+
+    /* Can view the stream but is unable to use interactive features such as chat and questions */
+    10 = OBSERVER;
+    
+    /* Can view the stream and partake of all interactive features */
+    50 = PARTICIPANT;
+    
+    /*As with participant, but access to host functions such as moderation */
+    300 = HOST;
+    
+    /* As with host but can access in-built presentation tools for the slide deck */
+    700 = PRESENTER;
+
+Although additional enums are displayed within the schema (e.g. producer), these cannot be accessed 
+by third-party integrations.
+
+Important: Access levels granted via this mechanism are not considered when forwarding between sessions. 
+
+---
+
+### Login :: Custom Title (string) [ 0 - 35 characters ] (Optional)
+You may automatically set the custom title of the user logging in by setting the custom_title value within
+the login object of the claims. 
+
+---
+
 ## Using the PHP Authentication API
 An API helper has been provided in the Digitell\LiveEventsPlatformAPI\Sessions\BrowserAuth\IdentitySessionEntryBuilder
-class. 
+class.
 
 ```php
-$client_id = 'example';
+use Digitell\LiveEventsPlatformAPI\Sessions\BrowserAuth\IdentitySessionEntryBuilder;$client_id = 'example';
 $unique_id = '12345';
 
 $builder = new IdentitySessionEntryBuilder(
@@ -111,12 +140,12 @@ Digitell, Inc. representative immediately to have it reset.
 If you creating an integration solution from scratch, you will need to build a URL containing
 the token which you can then pass to the user.
 
-By default, sessions will be hosted upon the live.digitellinc.com domain, however under
+By default, sessions will be hosted upon the live2.digitell.io domain, however under
 certain circumstances, you may be provided with access to other domains that host previews of upcoming
 features or special configurations. 
 
 To build a complete URL, append your token to the following URL:
-https://live.digitellinc.com/api/browser/authorize/sl/identity?token=
+https://live2.digitell.io/api/browser/authorize/sl/identity?token=
 
 #### PSF Tokens
 Digitell's Live Events Platform has the option to use additional URL flags called "PSF" or persistent
@@ -124,7 +153,7 @@ session flags. These can activate (or deactivate) certain functions on a per-use
 optional and do not require authentication or signing.
 
 PSF flags can be added to the end of a URL in the following manner:
-https://live.digitellinc.com/api/browser/authorize/sl/identity?token=YourToken&psf_example1=hello&psf_example2=world
+https://live2.digitell.io/api/browser/authorize/sl/identity?token=YourToken&psf_example1=hello&psf_example2=world
 
 Under normal circumstances you will not need to concern yourself with adding any of these flags,
 although we recommend building a way to add arbitrary query string parameters when building your
